@@ -134,6 +134,26 @@ public:
         }
         top1 = j + 1;
     }
+
+    void compute(int ind, int min, int row)
+    {
+        // int div;
+        for (int j = 1; j < top1; j++)
+        {
+            val[min][j] = val[min][j] / val[min][ind];
+        }
+        for (int i = 0; i < row; i++)
+        {
+            for (int j = 1; j < top1; j++)
+            {
+                if (i == min)
+                {
+                    break;
+                }
+                val[i][j] = val[i][j] - val[min][j] * val[i][ind];
+            }
+        }
+    }
     void push(int x)
     {
         val[row][top1++] = x;
@@ -142,14 +162,19 @@ public:
     {
     }
 
-    void computeRatio(int *x, int ind, int size){
+    int computeRatio(int *x, int ind, int size)
+    {
         // cout<<top1<<endl;
         // cout<<ind<<endl;
-        for(int i = 0; i<size; i++){
-            val[i][top1] = val[i][top1-1] / val[i][ind];
+        int min = 0;
+        for (int i = 0; i < size; i++)
+        {
+            val[i][top1] = val[i][top1 - 1] / val[i][ind];
+            min = val[i][top1] < val[i][min] ? i : min;
             // cout<<val[i][top1];
         }
         // cout<<endl;
+        return min;
     }
 
     friend int arraydec(int *, int *, Objfunc, constraints);
@@ -177,10 +202,11 @@ int arraydec(int *x, int *y, Objfunc p, constraints q)
 
 int main()
 {
+    // char *c = "basic variable";
     Objfunc st;
     constraints co;
     string exp;
-    int cons, *zj, *cj_zj, gre; //value -> no. of constraints
+    int cons, *zj, *cj_zj, gre, min; //value -> no. of constraints
     cout << "enter the expression: ";
     cin >> exp;
     st.impl(exp);
@@ -199,27 +225,64 @@ int main()
     co.resize(cons, st.top2);
     zj = new int[st.top1 + 1];
     cj_zj = new int[st.top1];
-    gre = arraydec(zj, cj_zj, st, co);
-    co.computeRatio(cj_zj, gre+1, cons);
-    for (int i = 0; i < st.top1; i++)
-        cout << st.val[i] << "\t";
-    cout << endl;
-    for (int i = 0; i < cons; i++)
+    do
     {
-        for (int j = 0; j < co.top1 + 1; j++)
+        gre = arraydec(zj, cj_zj, st, co);
+        min = co.computeRatio(cj_zj, gre + 1, cons);
+        for (int i = 0; i < 15; i++)
         {
-            cout << co.val[i][j] << "\t";
+            cout << " ";
         }
+        cout << "\tCJ\t";
+        for (int i = 0; i < st.top1; i++)
+            cout << st.val[i] << "\t";
         cout << endl;
-    }
+        cout << "Basic variables\t"
+             << "CB\t";
+        int incre = 1;
+        for (int i = 0; i < st.top1; i++)
+        {
+            if (i < st.top2)
+            {
+                cout << st.var[i] << "\t";
+            }
+            else
+            {
+                cout << "S" << incre << "\t";
+                incre++;
+            }
+        }
+        cout << "XB\tRatio\n";
+        for (int i = 0; i < cons; i++)
+        {
+            cout << "             S" << (i + 1) << "\t";
+            for (int j = 0; j < co.top1 + 1; j++)
+            {
+                cout << co.val[i][j] << "\t";
+            }
+            cout << endl;
+        }
 
-    cout << endl;
-    for (int i = 0; i < st.top1 + 1; i++)
-        cout << zj[i] << "\t";
-    cout << endl;
-    for (int i = 0; i < st.top1; i++)
-        cout << cj_zj[i] << "\t";
-    cout << endl;
-    cout<<co.top1<<endl;
+        cout << endl;
+        for (int i = 0; i < 13; i++)
+            cout << " ";
+        cout << "\tZj\t";
+        for (int i = 0; i < st.top1 + 1; i++)
+            cout << zj[i] << "\t";
+        cout << endl;
+        // for(int i=0; i<5; i++)
+        cout << " Cj-Zj ";
+        for (int i = 0; i < 5; i++)
+            cout << " ";
+        cout << "\t\t";
+        for (int i = 0; i < st.top1; i++)
+            cout << cj_zj[i] << "\t";
+        cout << endl;
+        cout << endl;
+        cout << endl;
+        // cout << co.top1 << endl;
+        co.val[min][0] = st.val[gre];
+        co.compute(gre + 1, min, cons);
+    } while (cj_zj[gre] > 0);
     return 0;
 }
