@@ -169,11 +169,20 @@ public:
         int min = 0;
         for (int i = 0; i < size; i++)
         {
-            val[i][top1] = val[i][top1 - 1] / val[i][ind];
-            min = val[i][top1] < val[i][min] ? i : min;
+            try
+            {
+                val[i][top1] = val[i][top1 - 1] / val[i][ind];
+                throw i;
+                min = val[i][top1] < val[min][top1] ? i : min;
+            }catch(int x){
+                cout<<"error in index "<<x<<endl;
+            }
+            catch(...){
+                cout<<"error elsewhere \n";
+            }
             // cout<<val[i][top1];
         }
-        // cout<<endl;
+        cout<<min<<endl;
         return min;
     }
 
@@ -278,6 +287,7 @@ int main()
         for (int i = 0; i < st.top1; i++)
             cout << cj_zj[i] << "\t";
         cout << endl;
+        cout << co.val[min][gre + 1] << " is the pivot element so making pivot element as 1 and rest of the element in pivot column as 0\n";
         cout << endl;
         cout << endl;
         // cout << co.top1 << endl;
