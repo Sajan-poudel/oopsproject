@@ -95,7 +95,7 @@ public:
     int **val;
     ~constraints()
     {
-        free(val);
+        // free(val);
     }
     void setsize(int a, int b)
     {
@@ -137,21 +137,27 @@ public:
 
     void compute(int ind, int min, int row)
     {
-        // int div;
+        int div;
+        // cout << top1 << endl;
         for (int j = 1; j < top1; j++)
         {
             val[min][j] = val[min][j] / val[min][ind];
+            // cout << val[min][j] << "\t";
         }
+        // cout << endl;
         for (int i = 0; i < row; i++)
         {
+            div = val[i][ind];
             for (int j = 1; j < top1; j++)
             {
                 if (i == min)
                 {
                     break;
                 }
-                val[i][j] = val[i][j] - val[min][j] * val[i][ind];
+                val[i][j] = val[i][j] - val[min][j] * div;
+                // cout << val[i][j] << "\t";
             }
+            // cout << endl;
         }
     }
     void push(int x)
@@ -162,27 +168,30 @@ public:
     {
     }
 
-    int computeRatio(int *x, int ind, int size)
+    int computeRatio(int ind, int size)
     {
         // cout<<top1<<endl;
         // cout<<ind<<endl;
         int min = 0;
+        // cout<<top1<<"\t"<<ind<<"\t"<<size<<endl;
         for (int i = 0; i < size; i++)
         {
-            try
+            // cout << "hey i am here\n";
+            // cout << val[i][top1 - 1] << "\t" << val[i][ind] << endl;
+            if (val[i][ind] == 0)
+            {
+                val[i][top1] = -1;
+            }
+            else
             {
                 val[i][top1] = val[i][top1 - 1] / val[i][ind];
-                throw i;
-                min = val[i][top1] < val[min][top1] ? i : min;
-            }catch(int x){
-                cout<<"error in index "<<x<<endl;
             }
-            catch(...){
-                cout<<"error elsewhere \n";
-            }
+            // cout << "this is done\n";
+            min = (val[i][top1] < val[min][top1]) && (val[i][top1] >= 0) ? i : min;
             // cout<<val[i][top1];
         }
-        cout<<min<<endl;
+        // cout << min << endl;
+        // cout << "compute done\n";
         return min;
     }
 
@@ -206,6 +215,7 @@ int arraydec(int *x, int *y, Objfunc p, constraints q)
             ind = y[a] > y[ind] ? a : ind;
         }
     }
+    // cout << "arraay dec done\n";
     return ind;
 }
 
@@ -237,7 +247,7 @@ int main()
     do
     {
         gre = arraydec(zj, cj_zj, st, co);
-        min = co.computeRatio(cj_zj, gre + 1, cons);
+        min = co.computeRatio(gre + 1, cons);
         for (int i = 0; i < 15; i++)
         {
             cout << " ";
@@ -287,12 +297,16 @@ int main()
         for (int i = 0; i < st.top1; i++)
             cout << cj_zj[i] << "\t";
         cout << endl;
-        cout << co.val[min][gre + 1] << " is the pivot element so making pivot element as 1 and rest of the element in pivot column as 0\n";
+        if (cj_zj[gre] > 0)
+        {
+            cout << co.val[min][gre + 1] << " is the pivot element so making pivot element as 1 and rest of the element in pivot column as 0\n";
+        }
         cout << endl;
         cout << endl;
         // cout << co.top1 << endl;
         co.val[min][0] = st.val[gre];
         co.compute(gre + 1, min, cons);
     } while (cj_zj[gre] > 0);
+    cout<<"Since there is no positive value in Cj-Zj we conclude that Zmax is: "<<zj[st.top1]<<endl;
     return 0;
 }
