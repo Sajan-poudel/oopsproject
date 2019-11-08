@@ -18,7 +18,7 @@ public:
         top1 = 0;
         top2 = 0;
     }
-    virtual void push(int) = 0;
+    virtual void push(double) = 0;
     virtual void push(char) = 0;
     void impl(string str)
     {
@@ -37,7 +37,7 @@ public:
                         x = x * 10 + (int)(str[i] - '0');
                     }
                     // val[top1++] = x * n;
-                    push(x * n);
+                    push((double)x * n);
                     i--;
                 }
                 else
@@ -62,9 +62,9 @@ public:
 class Objfunc : public stack
 {
 public:
-    int val[10];
+    double val[10];
     char var[10];
-    void push(int x)
+    void push(double x)
     {
         val[top1++] = x;
     }
@@ -80,7 +80,7 @@ public:
         }
     }
 
-    friend int arraydec(int *, int *, Objfunc, constraints);
+    friend int arraydec(double *, double *, Objfunc, constraints);
 };
 
 class constraints : public stack
@@ -92,7 +92,7 @@ public:
     {
         top1 = 1;
     }
-    int **val;
+    double **val;
     ~constraints()
     {
         // free(val);
@@ -100,16 +100,16 @@ public:
     void setsize(int a, int b)
     {
         string exp1;
-        val = new int *[a];
+        val = new double *[a];
         for (int i = 0; i < a; i++)
         {
-            val[i] = new int[b];
+            val[i] = new double[b];
         }
         for (int i = 0; i < a; i++)
         {
             top1 = 1;
             row = i;
-            cout << "Enter the  " << i + 1 << "  expression" << endl;
+            cout << "Enter the  " << i + 1 << "  expression: " << endl;
             cin >> exp1;
             impl(exp1);
         }
@@ -137,11 +137,12 @@ public:
 
     void compute(int ind, int min, int row)
     {
-        int div;
+        double div;
         // cout << top1 << endl;
+        div = val[min][ind];
         for (int j = 1; j < top1; j++)
         {
-            val[min][j] = val[min][j] / val[min][ind];
+            val[min][j] = val[min][j] / div;
             // cout << val[min][j] << "\t";
         }
         // cout << endl;
@@ -160,7 +161,7 @@ public:
             // cout << endl;
         }
     }
-    void push(int x)
+    void push(double x)
     {
         val[row][top1++] = x;
     }
@@ -195,10 +196,10 @@ public:
         return min;
     }
 
-    friend int arraydec(int *, int *, Objfunc, constraints);
+    friend int arraydec(double *, double *, Objfunc, constraints);
 };
 
-int arraydec(int *x, int *y, Objfunc p, constraints q)
+int arraydec(double *x, double *y, Objfunc p, constraints q)
 {
     int ind = 0;
     for (int a = 0, temp = 0; a < p.top1 + 1; a++)
@@ -225,7 +226,8 @@ int main()
     Objfunc st;
     constraints co;
     string exp;
-    int cons, *zj, *cj_zj, gre, min; //value -> no. of constraints
+    int cons, gre, min; //value -> no. of constraints
+    double  *zj, *cj_zj;
     cout << "enter the expression: ";
     cin >> exp;
     st.impl(exp);
@@ -242,8 +244,8 @@ int main()
     // string exp1[cons];
     co.setsize(cons, st.top2 + cons + 3);
     co.resize(cons, st.top2);
-    zj = new int[st.top1 + 1];
-    cj_zj = new int[st.top1];
+    zj = new double[st.top1 + 1];
+    cj_zj = new double[st.top1];
     do
     {
         gre = arraydec(zj, cj_zj, st, co);
