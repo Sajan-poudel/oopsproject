@@ -64,9 +64,10 @@ class Objfunc : public stack
 public:
     double val[10];
     char var[10];
+    int op;
     void push(double x)
     {
-        val[top1++] = x;
+        val[top1++] = x * op;
     }
     void push(char c)
     {
@@ -81,6 +82,7 @@ public:
     }
 
     friend int arraydec(double *, double *, Objfunc, constraints);
+    friend void print(Objfunc, constraints, int, int, double *, double *);
 };
 
 class constraints : public stack
@@ -188,7 +190,8 @@ public:
                 val[i][top1] = val[i][top1 - 1] / val[i][ind];
             }
             // cout << "this is done\n";
-            min = (val[i][top1] < val[min][top1]) && (val[i][top1] >= 0) ? i : min;
+            min = ((val[i][top1] < val[min][top1]) && (val[i][top1] > 0)) ? i : min;
+            min = (val[min][top1] < 0) ? i : min;
             // cout<<val[i][top1];
         }
         // cout << min << endl;
@@ -197,16 +200,18 @@ public:
     }
 
     friend int arraydec(double *, double *, Objfunc, constraints);
+    friend void print(Objfunc, constraints, int, int, double *, double *);
 };
 
 int arraydec(double *x, double *y, Objfunc p, constraints q)
 {
     int ind = 0;
-    for (int a = 0, temp = 0; a < p.top1 + 1; a++)
+    double temp = 0;
+    for (int a = 0; a < p.top1 + 1; a++)
     {
         for (int j = 0; j < p.top1 - p.top2; j++)
         {
-            temp += q.val[j][0] * q.val[j][a + 1];
+            temp += q.val[j][a + 1] * q.val[j][0];
         }
         x[a] = temp;
         if (a < p.top1)
@@ -220,95 +225,123 @@ int arraydec(double *x, double *y, Objfunc p, constraints q)
     return ind;
 }
 
+void print(Objfunc st, constraints co, int gre, int min, int cons, double *zj, double *cj_zj)
+{
+    for (int i = 0; i < 15; i++)
+    {
+        cout << " ";
+    }
+    cout << "\tCJ\t";
+    for (int i = 0; i < st.top1; i++)
+        cout << st.val[i] << "\t";
+    cout << endl;
+    cout << "Basic variables\t"
+         << "CB\t";
+    int incre = 1;
+    for (int i = 0; i < st.top1; i++)
+    {
+        if (i < st.top2)
+        {
+            cout << st.var[i] << "\t";
+        }
+        else
+        {
+            cout << "S" << incre << "\t";
+            incre++;
+        }
+    }
+    cout << "XB\tRatio\n";
+    for (int i = 0; i < cons; i++)
+    {
+        cout << "             S" << (i + 1) << "\t";
+        for (int j = 0; j < co.top1 + 1; j++)
+        {
+            cout << co.val[i][j] << "\t";
+        }
+        cout << endl;
+    }
+
+    cout << endl;
+    for (int i = 0; i < 13; i++)
+        cout << " ";
+    cout << "\tZj\t";
+    for (int i = 0; i < st.top1 + 1; i++)
+        cout << zj[i] << "\t";
+    cout << endl;
+    // for(int i=0; i<5; i++)
+    cout << " Cj-Zj ";
+    for (int i = 0; i < 5; i++)
+        cout << " ";
+    cout << "\t\t";
+    for (int i = 0; i < st.top1; i++)
+        cout << cj_zj[i] << "\t";
+    cout << endl;
+    if (cj_zj[gre] > 0)
+    {
+        cout << co.val[min][gre + 1] << " is the pivot element so making pivot element as 1 and rest of the element in pivot column as 0\n";
+    }
+    cout << endl;
+}
+
 int main()
 {
     // char *c = "basic variable";
     Objfunc st;
     constraints co;
     string exp;
-    int cons, gre, min; //value -> no. of constraints
-    double  *zj, *cj_zj;
-    cout << "enter the expression: ";
-    cin >> exp;
-    st.impl(exp);
-    cout << exp << endl;
-    // for (int i = 0; i < st.top2; i++)
-    //     cout << st.var[i] << "\t";
-    // cout << endl;
-    // cout << st.var << endl;
-    // cout << st.top2 << endl;
-
-    cout << "Enter the number of constraints expression: ";
-    cin >> cons;
-    st.resize(cons);
-    // string exp1[cons];
-    co.setsize(cons, st.top2 + cons + 3);
-    co.resize(cons, st.top2);
-    zj = new double[st.top1 + 1];
-    cj_zj = new double[st.top1];
-    do
+    int cons, gre, min, ch = 0; //value -> no. of constraints
+    double *zj, *cj_zj;
+    cout << "\nenter the following operation to be done: \n";
+    cout << "1. To maximize\n";
+    cout << "2. To minimize\n";
+    cout << "3. exit\n>>>>>>>";
+    cin >> ch;
+    while (ch != 3)
     {
-        gre = arraydec(zj, cj_zj, st, co);
-        min = co.computeRatio(gre + 1, cons);
-        for (int i = 0; i < 15; i++)
+        if (ch == 1)
         {
-            cout << " ";
+            st.op = 1;
         }
-        cout << "\tCJ\t";
-        for (int i = 0; i < st.top1; i++)
-            cout << st.val[i] << "\t";
-        cout << endl;
-        cout << "Basic variables\t"
-             << "CB\t";
-        int incre = 1;
-        for (int i = 0; i < st.top1; i++)
+        else
         {
-            if (i < st.top2)
-            {
-                cout << st.var[i] << "\t";
-            }
-            else
-            {
-                cout << "S" << incre << "\t";
-                incre++;
-            }
+            st.op = -1;
         }
-        cout << "XB\tRatio\n";
-        for (int i = 0; i < cons; i++)
-        {
-            cout << "             S" << (i + 1) << "\t";
-            for (int j = 0; j < co.top1 + 1; j++)
-            {
-                cout << co.val[i][j] << "\t";
-            }
-            cout << endl;
-        }
+        cout << "enter the expression: ";
+        cin >> exp;
+        st.impl(exp);
+        cout << exp << endl;
+        // for (int i = 0; i < st.top2; i++)
+        //     cout << st.var[i] << "\t";
+        // cout << endl;
+        // cout << st.var << endl;
+        // cout << st.top2 << endl;
 
-        cout << endl;
-        for (int i = 0; i < 13; i++)
-            cout << " ";
-        cout << "\tZj\t";
-        for (int i = 0; i < st.top1 + 1; i++)
-            cout << zj[i] << "\t";
-        cout << endl;
-        // for(int i=0; i<5; i++)
-        cout << " Cj-Zj ";
-        for (int i = 0; i < 5; i++)
-            cout << " ";
-        cout << "\t\t";
-        for (int i = 0; i < st.top1; i++)
-            cout << cj_zj[i] << "\t";
-        cout << endl;
-        if (cj_zj[gre] > 0)
+        cout << "Enter the number of constraints expression: ";
+        cin >> cons;
+        st.resize(cons);
+        // string exp1[cons];
+        co.setsize(cons, st.top2 + cons + 3);
+        co.resize(cons, st.top2);
+        zj = new double[st.top1 + 1];
+        cj_zj = new double[st.top1];
+        do
         {
-            cout << co.val[min][gre + 1] << " is the pivot element so making pivot element as 1 and rest of the element in pivot column as 0\n";
-        }
-        cout << endl;
-        cout << endl;
-        // cout << co.top1 << endl;
-        co.val[min][0] = st.val[gre];
-        co.compute(gre + 1, min, cons);
-    } while (cj_zj[gre] > 0);
-    cout<<"Since there is no positive value in Cj-Zj we conclude that Zmax is: "<<zj[st.top1]<<endl;
+            gre = arraydec(zj, cj_zj, st, co);
+            min = co.computeRatio(gre + 1, cons);
+            print(st, co, gre, min, cons, zj, cj_zj);
+            // cout << co.top1 << endl;
+            co.val[min][0] = st.val[gre];
+            co.compute(gre + 1, min, cons);
+        } while (cj_zj[gre] > 0);
+        cout << "Since there is no positive value in Cj-Zj we conclude that ";
+        ch==1?cout<<"Zmax": cout<<"Zmin ";
+        cout<<" is: " << zj[st.top1] * st.op << endl;
+
+        cout << "\nenter the following operation to be done: \n";
+        cout << "1. To maximize\n";
+        cout << "2. To minimize\n";
+        cout << "3. exit\n>>>>>>>";
+        cin >> ch;
+    }
     return 0;
 }
